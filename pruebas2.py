@@ -1,4 +1,31 @@
-import cv2
+import cv2 as cv
+import numpy as np
+
+img = cv.imread("/home/misial/Descargas/train/00004.ppm")
+
+_delta = 4
+_min_area = 60
+_max_area = 10000
+_max_variation = 0.15
+_min_diversity = 0.2
+_max_evolution = 200
+_area_threshold = 1.01
+_min_margin = 0.003
+_edge_blur_size = 5
+
+mser = cv.MSER_create(_delta,_min_area, _max_area, _max_variation,_min_diversity,_max_evolution, _area_threshold, _min_margin, _edge_blur_size)
+
+gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+vis = img.copy()
+
+regions, _ = mser.detectRegions(gray)
+hulls = [cv.convexHull(p.reshape(-1, 1, 2)) for p in regions]
+cv.polylines(vis, hulls, 1, (0, 255, 0))
+print(hulls)
+cv.imshow('img', vis)
+cv.waitKey()
+
+'''import cv2
 import matplotlib
 import numpy as np
 
@@ -12,7 +39,8 @@ grey = cv2.cvtColor(m, cv2.COLOR_BGR2GRAY)
 
 mser = cv2.MSER_create()
 regions, bboxes = mser.detectRegions(grey)
-x1, y1, w, h = cv2.boundingRect(regions[200])
+x1, y1, w, h = cv2.boundingRect(regions[1000])
+print(regions)
 rect = (x1,y1,w,h)
 rects = []
 rects.append(rect)
@@ -20,7 +48,7 @@ cv2.rectangle(m, (x1, y1), (w+x1, h+y1), (0, 255, 0), -1);
 cv2.imshow("aaaaa",m)
 cv2.waitKey(0)
 
-'''
+
 print(m.shape)
 
 b = m[:,:,0]*0.11
