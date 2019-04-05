@@ -6,6 +6,33 @@ import argparse
 _cte_relacionMaxAnchoAlto = 1.5
 _cte_relacionMinAnchoAlto = 0.5
 _colorVerdeCaja = (0, 255, 0)
+_mascaraMediaPrecaucion = [
+ [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+ [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+ [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+ [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0],
+ [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0],
+ [0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0],
+ [0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0],
+ [0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0],
+ [0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0],
+ [0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0],
+ [0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0],
+ [0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0],
+ [0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 0, 0],
+ [0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 255, 0, 255, 0],
+ [0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 255, 0, 0],
+ [0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 255, 0],
+ [0, 0, 0, 0, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 0, 0],
+ [0, 0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 0],
+ [0, 0, 0, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 255],
+ [0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255],
+ [0, 0, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255],
+ [0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255],
+ [0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255],
+ [0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255],
+ [0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255]
+]
 
 # constructor mser
 _delta = 7
@@ -53,30 +80,16 @@ for archivo in listaDir:
         relacion = w/h
         if (relacion < _cte_relacionMaxAnchoAlto) and (relacion > _cte_relacionMinAnchoAlto):
             # print(len(filtrado_rects))
-            # Eliminar duplicidades
-            if len(filtrado_rects) == 0:
-                rect = (x, y, w, h)
-                filtrado_rects.append(rect)
-            else:
-                esta = False
-                for j in range(0, len(filtrado_rects)):
-                    (coorX1, coorY1, anchura, altura) = filtrado_rects[j]
-                    coorX2 = coorX1 + anchura
-                    coorY2 = coorY1 + altura
-                    if (x > coorX1) and (x < coorX2) and (y > coorY1) and (y < coorY2):
-                        esta = True
-                if not esta :
-                    # if height is enough
-                    # create rectangle for bounding
-                    rect = (x, y, w, h)
-                    filtrado_rects.append(rect)
-                    rect = (x-(w//10), y-(w//10), w+(w//10), h+(w//10))
-                    rects.append(rect)
-                    cv2.rectangle(vis, (x-(w//10), y-(w//10)), (x + w+(w//10), y + h+(w//10)), _colorVerdeCaja)
+            rect1 = (x-(w//10), y-(w//10), w+(w//10), h+(w//10))
+            rects.append(rect1)
+            rect2 = (x-(w//4), y-(w//4), w+(w//4), h+(w//4))
+            rects.append(rect2)
+            cv2.rectangle(vis, (x-(w//10), y-(w//10)), (x + w+(w//10), y + h+(w//10)), _colorVerdeCaja)
+            cv2.rectangle(vis, (x-(w//4), y-(w//4)), (x + w+(w//4), y + h+(w//4)), _colorVerdeCaja)
     print(archivo.title())
     cv2.imshow('detecciones', vis)
     cv2.waitKey()
-    '''
+
     # habria que continuar por "2 Utilizar el espacio de color HSV para localizar los píxeles que sean de color rojo"
     #Rojos:
     rojo_bajos1 = np.array([0,50,50], dtype=np.uint8)
@@ -98,8 +111,32 @@ for archivo in listaDir:
         # Juntar todas las mascaras
         mask = cv2.add(mascara_rojo1, mascara_rojo2)
 
-   
-        nombre = "Mascara" + str(i)
-        cv2.imshow(nombre, mask)
-        cv2.waitKey()
+          # comparar mascara con mascara media (no sabemos si asi puesta la media funciona)
+
+        #nombre = "Mascara" + str(i)
+        #cv2.imshow(nombre, mask)
+        #cv2.waitKey()
+    '''
+                # Eliminar duplicidades
+            if len(filtrado_rects) == 0:
+                rect = (x, y, w, h)
+                filtrado_rects.append(rect)
+            else:
+                esta = False
+                for j in range(0, len(filtrado_rects)):
+                    (coorX1, coorY1, anchura, altura) = filtrado_rects[j]
+                    coorX2 = coorX1 + anchura
+                    coorY2 = coorY1 + altura
+                    condCoordInfIzq = (x > coorX1) and (x < coorX2) and (y > coorY1) and (y < coorY2)
+                    condCoordSupDch = (x > coorX1) and (x < coorX2) and (y > coorY1) and (y < coorY2)
+                    if condCoordInfIzq and condCoordSupDch:
+                        esta = True
+                if not esta :
+                    # if height is enough
+                    # create rectangle for bounding
+                    rect = (x, y, w, h)
+                    filtrado_rects.append(rect)
+                    rect = (x-(w//10), y-(w//10), w+(w//10), h+(w//10))
+                    rects.append(rect)
+                    cv2.rectangle(vis, (x-(w//10), y-(w//10)), (x + w+(w//10), y + h+(w//10)), _colorVerdeCaja)
     '''
