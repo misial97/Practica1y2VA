@@ -129,12 +129,49 @@ for numCarp in range(0, _numCarpetas):
         aux_mask_pre = (mask * mascaraMediaPrecaucion)
         aux_mask_stp = (mask * mascaraMediaSTOP)
 
-        print("Foto :  " + archivo.title().lower() +".............." )
+        #pixeles coincidentes foto a foto
+        print("Foto :  " + archivo.title().lower() + "..............")
         print("\tProhibicion: " + str(np.sum(aux_mask_pro)))
         print("\tPrecaucion: " + str(np.sum(aux_mask_pre)))
         print("\tSTOP: " + str(np.sum(aux_mask_stp)))
 
-        print("------------------------------------------------------------------------------------------------------------")
+        print("--------------------------------------------------------------------------------------------------------")
+
+    '''
+        #abanico total de pixeles coincidentes
+        if indice == 0:
+            limiteInfStop = np.sum(aux_mask_stp)
+            limiteInfPro = np.sum(aux_mask_pro)
+            limiteInfPre = np.sum(aux_mask_pre)
+            limiteSupPro = np.sum(aux_mask_pro)
+            limiteSupPre = np.sum(aux_mask_pre)
+            limiteSupStop = np.sum(aux_mask_stp)
+        else:
+
+            if limiteInfPro > np.sum(aux_mask_pro) :
+                limiteInfPro = np.sum(aux_mask_pro)
+            elif limiteSupPro < np.sum(aux_mask_pro):
+                limiteSupPro = np.sum(aux_mask_pro)
+
+            if limiteInfPre > np.sum(aux_mask_pre) :
+                limiteInfPre = np.sum(aux_mask_pre)
+            elif limiteSupPre < np.sum(aux_mask_pre):
+                limiteSupPre = np.sum(aux_mask_pre)
+
+            if limiteInfStop > np.sum(aux_mask_stp) :
+                limiteInfStop = np.sum(aux_mask_stp)
+            elif limiteSupStop < np.sum(aux_mask_stp):
+                limiteSupStop = np.sum(aux_mask_stp)
+        indice += 1
+                
+
+print("Prohibicion: [ " + str(limiteInfPro) + ", " + str(limiteSupPro) + " ]")
+print("---------")
+print("Precau: [ " + str(limiteInfPre) + ", " + str(limiteSupPre) + " ]")
+print("---------")
+print("STOP: [ " + str(limiteInfStop) + ", " + str(limiteSupStop) + " ]")
+'''
+
 
 
 #print(mask * mascaraMediaPrecaucion)
