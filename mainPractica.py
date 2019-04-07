@@ -3,37 +3,17 @@ import os
 import numpy as np
 import sys
 import argparse
+
 _cte_relacionMaxAnchoAlto = 1.5
 _cte_relacionMinAnchoAlto = 0.5
 _colorVerdeCaja = (0, 255, 0)
-_mascaraMediaPrecaucion = [
- [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
- [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
- [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0],
- [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0],
- [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0],
- [0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0],
- [0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0],
- [0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0],
- [0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0],
- [0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0],
- [0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0],
- [0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0],
- [0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 0, 0],
- [0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 255, 0, 255, 0],
- [0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 255, 0, 0],
- [0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 255, 0],
- [0, 0, 0, 0, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 0, 0],
- [0, 0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 0],
- [0, 0, 0, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 255],
- [0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255],
- [0, 0, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255],
- [0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255],
- [0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255],
- [0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255],
- [0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255]
-]
+mascaraMediaPrecaucion = cv2.imread("/home/misial/PycharmProjects/practica2/mascaras/mascaraMediaPrecaucion.ppm")
+mascaraMediaProhibicion = cv2.imread("/home/misial/PycharmProjects/practica2/mascaras/mascaraMediaProhibicion.ppm")
+mascaraMediaSTOP = cv2.imread("/home/misial/PycharmProjects/practica2/mascaras/mascaraMediaSTOP.ppm")
 
+mascaraMediaProhibicion = cv2.cvtColor(mascaraMediaProhibicion, cv2.COLOR_BGR2GRAY)
+mascaraMediaPrecaucion = cv2.cvtColor(mascaraMediaPrecaucion, cv2.COLOR_BGR2GRAY)
+mascaraMediaSTOP = cv2.cvtColor(mascaraMediaSTOP, cv2.COLOR_BGR2GRAY)
 # constructor mser
 _delta = 7
 _min_area = 100
@@ -45,7 +25,8 @@ _area_threshold = 1.01
 _min_margin = 0.003
 _edge_blur_size = 5
 
-
+cv2.imshow("mascaramediaconstante", mascaraMediaPrecaucion)
+cv2.waitKey()
 listaDir = os.listdir("/home/misial/Descargas/train/")
 listaDir.sort()
 print(listaDir[0].title())
@@ -68,7 +49,8 @@ for archivo in listaDir:
     # cv2.waitKey()
 
     # detectamos regiones alto contraste
-    mser = cv2.MSER_create(_delta,_min_area, _max_area, _max_variation,_min_diversity,_max_evolution, _area_threshold, _min_margin, _edge_blur_size)
+    mser = cv2.MSER_create(_delta, _min_area, _max_area, _max_variation, _min_diversity, _max_evolution,
+                           _area_threshold, _min_margin, _edge_blur_size)
     regions, _ = mser.detectRegions(grayEqHist)
     hulls = [cv2.convexHull(p.reshape(-1, 1, 2)) for p in regions]
     filtrado_rects = []
@@ -77,31 +59,31 @@ for archivo in listaDir:
     # pintamos los rectangulos de las regiones detectadas
     for i in range(0, len(regions)):
         x, y, w, h = cv2.boundingRect(regions[i])
-        relacion = w/h
+        relacion = w / h
         if (relacion < _cte_relacionMaxAnchoAlto) and (relacion > _cte_relacionMinAnchoAlto):
             # print(len(filtrado_rects))
-            rect1 = (x-(w//10), y-(w//10), w+(w//10), h+(w//10))
+            rect1 = (x - (w // 10), y - (w // 10), w + (w // 10), h + (w // 10))
             rects.append(rect1)
-            rect2 = (x-(w//4), y-(w//4), w+(w//4), h+(w//4))
+            rect2 = (x - (w // 4), y - (w // 4), w + (w // 4), h + (w // 4))
             rects.append(rect2)
-            cv2.rectangle(vis, (x-(w//10), y-(w//10)), (x + w+(w//10), y + h+(w//10)), _colorVerdeCaja)
-            cv2.rectangle(vis, (x-(w//4), y-(w//4)), (x + w+(w//4), y + h+(w//4)), _colorVerdeCaja)
+            cv2.rectangle(vis, (x - (w // 10), y - (w // 10)), (x + w + (w // 10), y + h + (w // 10)), _colorVerdeCaja)
+            cv2.rectangle(vis, (x - (w // 4), y - (w // 4)), (x + w + (w // 4), y + h + (w // 4)), _colorVerdeCaja)
     print(archivo.title())
     cv2.imshow('detecciones', vis)
     cv2.waitKey()
 
     # habria que continuar por "2 Utilizar el espacio de color HSV para localizar los píxeles que sean de color rojo"
-    #Rojos:
-    rojo_bajos1 = np.array([0,50,50], dtype=np.uint8)
-    rojo_bajos2 = np.array([240,50,50], dtype=np.uint8)
+    # Rojos:
+    rojo_bajos1 = np.array([0, 50, 50], dtype=np.uint8)
+    rojo_bajos2 = np.array([240, 50, 50], dtype=np.uint8)
     rojo_altos1 = np.array([12, 255, 255], dtype=np.uint8)
     rojo_altos2 = np.array([256, 255, 255], dtype=np.uint8)
-    
+
     for i in range(0, len(rects)):
-        (x,y,w,h) = rects[i]
+        (x, y, w, h) = rects[i]
         crop_img = img[y:y + h, x:x + w]
         # No sabemos cómo se hace para ajustar la imagen a 25 píxeles
-        img_recortada = cv2.resize(crop_img, (25,25), interpolation=cv2.INTER_NEAREST)
+        img_recortada = cv2.resize(crop_img, (25, 25), interpolation=cv2.INTER_NEAREST)
         hsv = cv2.cvtColor(img_recortada, cv2.COLOR_BGR2HSV)
 
         # Crear las mascaras
@@ -111,11 +93,19 @@ for archivo in listaDir:
         # Juntar todas las mascaras
         mask = cv2.add(mascara_rojo1, mascara_rojo2)
 
-          # comparar mascara con mascara media (no sabemos si asi puesta la media funciona)
+        #comparacion de mascaras
 
-        #nombre = "Mascara" + str(i)
-        #cv2.imshow(nombre, mask)
-        #cv2.waitKey()
+        aux_mask_pro = (mask * mascaraMediaProhibicion)
+        print("Pro: " + str(np.sum(aux_mask_pro)))
+        aux_mask_pre = (mask * mascaraMediaPrecaucion)
+        print("Pre: " + str(np.sum(aux_mask_pre)))
+        aux_mask_stp = (mask * mascaraMediaSTOP)
+        print("Stop: " + str(np.sum(aux_mask_stp)))
+
+    # comparar mascara con mascara media (no sabemos si asi puesta la media funciona)
+    # nombre = "Mascara" + str(i)
+    # cv2.imshow(nombre, mask)
+    # cv2.waitKey()
     '''
                 # Eliminar duplicidades
             if len(filtrado_rects) == 0:

@@ -1,9 +1,10 @@
 import cv2
 import os
 import numpy as np
+from PIL import Image
 
-_numCarpetas = 31  # precaucion
-#_numCarpetas = 12 # prohibicion
+#_numCarpetas = 31  # precaucion
+_numCarpetas = 11 # prohibicion
 mascaras = []
 mascara_media = np.zeros((25, 25))
 print(type(mascara_media))
@@ -15,15 +16,15 @@ rojo_bajos2 = np.array([240,50,50], dtype=np.uint8)
 rojo_altos1 = np.array([12, 255, 255], dtype=np.uint8)
 rojo_altos2 = np.array([256, 255, 255], dtype=np.uint8)
 
-#for numCarp in range(0, _numCarpetas):
-for numCarp in range(17, _numCarpetas):
+for numCarp in range(0, _numCarpetas):
     if numCarp < 10:
         carpeta = "0" + str(numCarp)
     else:
         carpeta = str(numCarp)
 
-    ruta = "/home/misial/Descargas/train_recortadas/precaucion/" + carpeta
-    #ruta = "/home/misial/Descargas/train_recortadas/prohib/" + carpeta
+    #ruta = "/home/misial/Descargas/train_recortadas/precaucion/" + carpeta
+    ruta = "/home/misial/Descargas/train_recortadas/prohib/" + carpeta
+    #ruta = "/home/misial/Descargas/train_recortadas/stop"
     contenido = os.listdir(ruta)
     contenido.sort()
 
@@ -57,3 +58,9 @@ mascara_media[condMayor] = 255
 cv2.imshow("mask_media", mascara_media)
 print(mascara_media)
 cv2.waitKey()
+
+guardar = Image.fromarray(mascara_media.astype(np.uint8))
+print("......................................")
+
+print(mascara_media.astype(np.uint8))
+guardar.save("/home/misial/PycharmProjects/practica2/mascaras/mascaraMediaProhibicion.ppm")
