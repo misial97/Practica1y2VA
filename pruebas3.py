@@ -14,6 +14,7 @@ mascaraMediaSTOP = cv2.imread("./mascaras/mascaraMediaSTOP.ppm")
 mascaraMediaProhibicion = cv2.cvtColor(mascaraMediaProhibicion, cv2.COLOR_BGR2GRAY)
 mascaraMediaPrecaucion = cv2.cvtColor(mascaraMediaPrecaucion, cv2.COLOR_BGR2GRAY)
 mascaraMediaSTOP = cv2.cvtColor(mascaraMediaSTOP, cv2.COLOR_BGR2GRAY)
+
 # constructor mser
 _delta = 10
 _min_area = 100
@@ -31,16 +32,21 @@ rojo_bajos2 = np.array([240, 50, 50], dtype=np.uint8)
 rojo_altos1 = np.array([12, 255, 255], dtype=np.uint8)
 rojo_altos2 = np.array([256, 255, 255], dtype=np.uint8)
 
-listaDir = os.listdir("/home/misial/Descargas/train/")
+listaDir = os.listdir("/home/misial/Descargas/test/")
 listaDir.sort()
 
-def crea_compara_mascaras():
+
+def crea_compara_mascaras(tituloImg):
     for i in range(0, len(rects)):
         #print(str(i + 1) + "pinta mascaras")
         (x, y, w, h) = rects[i]
         if (x > 0) and (y > 0) and (y + h > 0):
             crop_img = img[y:y + h, x:x + w]
             # No sabemos cómo se hace para ajustar la imagen a 25 píxeles
+
+
+
+
             # print(str(x)+","+str(y)+","+str(w)+","+str(h))
             img_recortada = cv2.resize(crop_img, (25, 25), interpolation=cv2.INTER_NEAREST)
             hsv = cv2.cvtColor(img_recortada, cv2.COLOR_BGR2HSV)
@@ -61,10 +67,14 @@ def crea_compara_mascaras():
             pix_mask_pre = np.sum(aux_mask_pre)
             pix_mask_stp = np.sum(aux_mask_stp)
 
-            # print("Pro: " + str(pix_mask_pro))
-            # print("Pre: " + str(pix_mask_pre))
-            # print("Stop: " + str(pix_mask_stp))
-            if (pix_mask_pre > 150) and (pix_mask_pro > 150) and (pix_mask_stp > 150):
+            cv2.imshow("mask", mask)
+            cv2.waitKey()
+            # comparar mascara con mascara media (no sabemos si asi puesta la media funciona)
+            '''nombre = "Mascara_" + tituloImg + "_" + str(i)
+            cv2.imshow(nombre, mask)
+            cv2.waitKey()'''
+            '''
+            if (pix_mask_pre > 100) or (pix_mask_pro > 100) or (pix_mask_stp > 100):
                 if (pix_mask_pro > pix_mask_pre) and (pix_mask_pro > pix_mask_stp):
                     cv2.imshow("PROHIBICION", mask)
                     cv2.waitKey()
@@ -74,7 +84,7 @@ def crea_compara_mascaras():
                 elif (pix_mask_stp > pix_mask_pre) and (pix_mask_stp > pix_mask_pro):
                     cv2.imshow("STOP", mask)
                     cv2.waitKey()
-
+            '''
             '''
                         if (pix_mask_pre > 150) and (pix_mask_pro > 10) and (pix_mask_stp > 10):
                 nombre = "Mascara" + str(i)
@@ -118,7 +128,7 @@ def main():
     for archivo in listaDir:
         # print(str(num) + "archivo")
         # cargamos imagen
-        img = cv2.imread("/home/misial/Descargas/train/" + archivo.title().lower())
+        img = cv2.imread("/home/misial/Descargas/test/" + archivo.title().lower())
 
         # cv2.imshow("original", img)
         vis = img.copy()
@@ -129,7 +139,7 @@ def main():
         # cv2.imshow("escala_grises",gray)
         # cv2.waitKey()
 
-        # equalizamos histograma para mejorar contraste (detecta más señales usando esta imagen que la escala grises normal)
+        # equalizamos histograma para mejorar contraste (detecta más senyales usando esta imagen que la escala grises normal)
         grayEqHist = cv2.equalizeHist(gray)
         # cv2.imshow("hist", grayEqHist)
         # cv2.waitKey()
@@ -142,16 +152,13 @@ def main():
         cv2.waitKey()
         # print("longitud rects=" + str(len(rects)))
 
-        crea_compara_mascaras()
+        crea_compara_mascaras(archivo.title().lower())
 
 
 main()
 
 
-# comparar mascara con mascara media (no sabemos si asi puesta la media funciona)
-# nombre = "Mascara" + str(i)
-#    cv2.imshow("mascara", mask)
-#   cv2.waitKey()
+
 '''
                 # Eliminar duplicidades
             if len(filtrado_rects) == 0:

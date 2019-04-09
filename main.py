@@ -53,7 +53,7 @@ _rojo_altos2 = np.array([256, 255, 255], dtype=np.uint8)
 
 
 def main():
-    # Captación de argumentos consola
+    # Captacion de argumentos consola
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--train_path", "--train_path", help="Ruta carpeta imagenes de entrenamiento")
@@ -99,7 +99,7 @@ def main():
         # Creamos las mascaras de cada region detectada y la comparamos con las mascaras medias
         datos = crea_compara_mascaras(img, mascaras_medias, rects)
 
-        # Escritura del fichero por cada señal detectada en la imagen (linea a linea)
+        # Escritura del fichero por cada senyal detectada en la imagen (linea a linea)
         for senyal in datos:
             escribir(fichero_result, titulo, senyal)
 
@@ -258,7 +258,7 @@ def mascara_media(ruta):
                 # Juntar todas las mascaras
                 mascara_final = cv2.add(mascara_bajos, mascara_altos)
 
-                # Se añade al elemento de la lista correspondiente al tipo
+                # Se anyade al elemento de la lista correspondiente al tipo
                 mascaras[0].append(mascara_final)
 
             # Peligro
@@ -277,7 +277,7 @@ def mascara_media(ruta):
                 # Juntar todas las mascaras
                 mascara_final = cv2.add(mascara_bajos, mascara_altos)
 
-                # Se añade al elemento de la lista correspondiente al tipo
+                # Se anyade al elemento de la lista correspondiente al tipo
                 mascaras[1].append(mascara_final)
 
             # STOP
@@ -296,7 +296,7 @@ def mascara_media(ruta):
                 # Juntar todas las mascaras
                 mascara_final = cv2.add(mascara_bajos, mascara_altos)
 
-                # Se añade al elemento de la lista correspondiente al tipo
+                # Se anyade al elemento de la lista correspondiente al tipo
                 mascaras[2].append(mascara_final)
 
     mascaras_media = [np.zeros((_tamMatrizFijo, _tamMatrizFijo)), np.zeros((_tamMatrizFijo, _tamMatrizFijo)),
