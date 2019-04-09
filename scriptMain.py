@@ -85,6 +85,7 @@ def main():
 def crea_compara_mascaras(img, mascaras_medias, rects):
     datos = [[]]
     senyal = []
+    detecciones = []
     for i in range(0, len(rects)):
         (x, y, w, h) = rects[i]
         # Comprobamos que son coordenadas positivas
@@ -111,47 +112,59 @@ def crea_compara_mascaras(img, mascaras_medias, rects):
             pix_mask_pro = int(np.sum(aux_mask_pro))
             pix_mask_pre = int(np.sum(aux_mask_pre))
             pix_mask_stp = int(np.sum(aux_mask_stp))
+            if not pertenece(x, y, w, h, detecciones):
+                if (pix_mask_pre > 50) or (pix_mask_pro > 50) or (pix_mask_stp > 50):
+                    if (pix_mask_stp > 200):
+                        print("STOP")
+                        score_stp = pix_mask_stp / _pix_totales
 
-            if (pix_mask_pre > 50) or (pix_mask_pro > 50) or (pix_mask_stp > 50):
-                if (pix_mask_stp > 200):
-                    score_stp = pix_mask_stp / _pix_totales
+                        senyal.append(x)
+                        senyal.append(y)
+                        senyal.append(x + w)
+                        senyal.append(y + h)
+                        senyal.append(3)
+                        senyal.append(int(score_stp * 100))
 
-                    senyal.append(x)
-                    senyal.append(y)
-                    senyal.append(x + w)
-                    senyal.append(y + h)
-                    senyal.append(3)
-                    senyal.append(int(score_stp * 100))
+                        datos.append(senyal)
 
-                    datos.append(senyal)
+                        coor = (x, y, w, h)
+                        detecciones.append(coor)
 
-                    senyal = []
-                elif(pix_mask_pro > 100 and pix_mask_pro < 150):
-                    score_pro = pix_mask_pro / _pix_totales
+                        senyal = []
+                    elif(pix_mask_pro > 100 and pix_mask_pro < 150):
+                        print("PROHIBICION")
+                        score_pro = pix_mask_pro / _pix_totales
 
-                    senyal.append(x)
-                    senyal.append(y)
-                    senyal.append(x + w)
-                    senyal.append(y + h)
-                    senyal.append(1)
-                    senyal.append(int(score_pro * 100))
+                        senyal.append(x)
+                        senyal.append(y)
+                        senyal.append(x + w)
+                        senyal.append(y + h)
+                        senyal.append(1)
+                        senyal.append(int(score_pro * 100))
 
-                    datos.append(senyal)
+                        datos.append(senyal)
 
-                    senyal = []
-                elif(pix_mask_pre > 50 and pix_mask_pre < 70):
-                    score_pre = pix_mask_pre / _pix_totales
+                        coor = (x, y, w, h)
+                        detecciones.append(coor)
 
-                    senyal.append(x)
-                    senyal.append(y)
-                    senyal.append(x + w)
-                    senyal.append(y + h)
-                    senyal.append(2)
-                    senyal.append(int(score_pre * 100))
+                        senyal = []
+                    elif(pix_mask_pre > 50 and pix_mask_pre < 70):
+                        print("PRECAUCION")
+                        score_pre = pix_mask_pre / _pix_totales
 
-                    datos.append(senyal)
+                        senyal.append(x)
+                        senyal.append(y)
+                        senyal.append(x + w)
+                        senyal.append(y + h)
+                        senyal.append(2)
+                        senyal.append(int(score_pre * 100))
 
-                    senyal = []
+                        datos.append(senyal)
+
+                        coor = (x, y, w, h)
+                        detecciones.append(coor)
+
+                        senyal = []
 
     return datos
 
@@ -301,5 +314,20 @@ def escribir(ruta, titulo, datos):
         fichero.close()
 
 
+def pertenece(x, y, w, h, senyal):
+    esta = False
+    x2 = x+w
+    y2 = y+h
+    for i in range(0, len(senyal)):
+        x_aux, y_aux, w_aux, h_aux = senyal[i]
+        x2_aux = x_aux + w_aux
+        y2_aux = y_aux + h_aux
+        if (x_aux == x and y_aux == y) or (x2_aux == x2 and y2_aux == y2):
+            esta = True
+
+    return esta
+
+
 main()
 print("-------- RECONOCIMIENTO FINALIZADO --------")
+
