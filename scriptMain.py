@@ -27,7 +27,8 @@ _area_threshold = 1.01
 _min_margin = 0.003
 _edge_blur_size = 5
 
-# Rojos:
+_pix_totales = 625
+# Rojos:01520
 _rojo_bajos1 = np.array([0, 50, 50], dtype=np.uint8)
 _rojo_bajos2 = np.array([240, 50, 50], dtype=np.uint8)
 _rojo_altos1 = np.array([12, 255, 255], dtype=np.uint8)
@@ -48,11 +49,10 @@ def main():
 
     # test + "/resultado.txt"
     fichero_result = os.path.join(test, "resultado.txt")
-    print("voy a eliminar el fichero antiguo.....")
+
     # Si existe un fichero anterior, lo elimina:
     if os.path.isfile(fichero_result):
         os.remove(fichero_result)
-    print("eliminado.")
 
     mascaras_medias = mascara_media(entrenamiento)
 
@@ -82,7 +82,6 @@ def main():
             escribir(fichero_result, titulo, senyal)
 
 
-
 def crea_compara_mascaras(img, mascaras_medias, rects):
     datos = [[]]
     senyal = []
@@ -104,42 +103,56 @@ def crea_compara_mascaras(img, mascaras_medias, rects):
             mask = cv2.add(mascara_rojo1, mascara_rojo2)
 
             # Comparacion de mascaras
-            aux_mask_pro = (mask * mascaras_medias[0])
-            aux_mask_pre = (mask * mascaras_medias[1])
-            aux_mask_stp = (mask * mascaras_medias[2])
+            # //255*255 para sacar unos en aux_mask
+            aux_mask_pro = (mask * mascaras_medias[0]) // (255*255)
+            aux_mask_pre = (mask * mascaras_medias[1]) // (255*255)
+            aux_mask_stp = (mask * mascaras_medias[2]) // (255*255)
 
-            pix_mask_pro = np.sum(aux_mask_pro)
-            pix_mask_pre = np.sum(aux_mask_pre)
-            pix_mask_stp = np.sum(aux_mask_stp)
+            pix_mask_pro = int(np.sum(aux_mask_pro))
+            pix_mask_pre = int(np.sum(aux_mask_pre))
+            pix_mask_stp = int(np.sum(aux_mask_stp))
 
-            if (pix_mask_pre > 100) and (pix_mask_pro > 100) and (pix_mask_stp > 100):
-                if (pix_mask_pro > pix_mask_pre) and (pix_mask_pro > pix_mask_stp):
-                    print("prohibicion detectada 1")
-                    senyal.append(x)
-                    senyal.append(y)
-                    senyal.append(x + w)
-                    senyal.append(y + h)
-                    senyal.append(1)
-                    datos.append(senyal)
-                    senyal = []
-                elif (pix_mask_pre > pix_mask_pro) and (pix_mask_pre > pix_mask_stp):
-                    print("peligro detectada 2")
-                    senyal.append(x)
-                    senyal.append(y)
-                    senyal.append(x + w)
-                    senyal.append(y + h)
-                    senyal.append(2)
-                    datos.append(senyal)
-                    senyal = []
-                elif (pix_mask_stp > pix_mask_pre) and (pix_mask_stp > pix_mask_pro):
-                    print("stop detectado 3")
+            if (pix_mask_pre > 50) or (pix_mask_pro > 50) or (pix_mask_stp > 50):
+                if (pix_mask_stp > 200):
+                    score_stp = pix_mask_stp / _pix_totales
+
                     senyal.append(x)
                     senyal.append(y)
                     senyal.append(x + w)
                     senyal.append(y + h)
                     senyal.append(3)
+                    senyal.append(int(score_stp * 100))
+
                     datos.append(senyal)
+
                     senyal = []
+                elif(pix_mask_pro > 100 and pix_mask_pro < 150):
+                    score_pro = pix_mask_pro / _pix_totales
+
+                    senyal.append(x)
+                    senyal.append(y)
+                    senyal.append(x + w)
+                    senyal.append(y + h)
+                    senyal.append(1)
+                    senyal.append(int(score_pro * 100))
+
+                    datos.append(senyal)
+
+                    senyal = []
+                elif(pix_mask_pre > 50 and pix_mask_pre < 70):
+                    score_pre = pix_mask_pre / _pix_totales
+
+                    senyal.append(x)
+                    senyal.append(y)
+                    senyal.append(x + w)
+                    senyal.append(y + h)
+                    senyal.append(2)
+                    senyal.append(int(score_pre * 100))
+
+                    datos.append(senyal)
+
+                    senyal = []
+
     return datos
 
 
@@ -181,7 +194,6 @@ def mascara_media(ruta):
             parametros.append(linea.split(";"))
         # Eliminamos el ultimo elemento de la lista ("\r\n")
         parametros.pop()
-        # print(parametros)
 
         for datoSenyal in parametros:
             titulo = datoSenyal[0]
@@ -190,7 +202,6 @@ def mascara_media(ruta):
             w = int(datoSenyal[3]) - x
             h = int(datoSenyal[4]) - y
             tipo = int(datoSenyal[5].replace("\r\n", ""))
-            # print(titulo+";"+str(x)+";"+str(y)+";"+str(w)+";"+str(h)+";"+str(tipo))
 
             # Prohibicion
             if ((tipo >= 0) and (tipo <= 5)) or ((tipo >= 7) and (tipo <= 10)) or ((tipo == 15) or (tipo == 16)):
@@ -276,17 +287,6 @@ def mascara_media(ruta):
     mascaras_media[1][condicion1] = _negro
     mascaras_media[1][condicion2] = _blanco
 
-    # mascaras_media[0] = cv2.cvtColor(mascaras_media[0], cv2.COLOR_BGR2GRAY)
-    # mascaras_media[1] = cv2.cvtColor(mascaras_media[1], cv2.COLOR_BGR2GRAY)
-    # mascaras_media[2] = cv2.cvtColor(mascaras_media[2], cv2.COLOR_BGR2GRAY)
-    '''
-        cv2.imshow("pro", mascaras_media[0])
-        cv2.waitKey()
-        cv2.imshow("pre", mascaras_media[1])
-        cv2.waitKey()
-        cv2.imshow("stp", mascaras_media[2])
-        cv2.waitKey()
-    '''
     return mascaras_media
 
 
@@ -303,28 +303,3 @@ def escribir(ruta, titulo, datos):
 
 main()
 print("-------- RECONOCIMIENTO FINALIZADO --------")
-
-'''
-                # Eliminar duplicidades
-            if len(filtrado_rects) == 0:
-                rect = (x, y, w, h)
-                filtrado_rects.append(rect)
-            else:
-                esta = False
-                for j in range(0, len(filtrado_rects)):
-                    (coorX1, coorY1, anchura, altura) = filtrado_rects[j]
-                    coorX2 = coorX1 + anchura
-                    coorY2 = coorY1 + altura
-                    condCoordInfIzq = (x > coorX1) and (x < coorX2) and (y > coorY1) and (y < coorY2)
-                    condCoordSupDch = (x > coorX1) and (x < coorX2) and (y > coorY1) and (y < coorY2)
-                    if condCoordInfIzq and condCoordSupDch:
-                        esta = True
-                if not esta :
-                    # if height is enough
-                    # create rectangle for bounding
-                    rect = (x, y, w, h)
-                    filtrado_rects.append(rect)
-                    rect = (x-(w//10), y-(w//10), w+(w//10), h+(w//10))
-                    rects.append(rect)
-                    cv2.rectangle(vis, (x-(w//10), y-(w//10)), (x + w+(w//10), y + h+(w//10)), _colorVerdeCaja)
-'''
