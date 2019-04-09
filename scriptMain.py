@@ -4,6 +4,10 @@ import os
 import numpy as np
 import argparse
 
+# Constantes
+
+# Eliminacion numeros magicos
+
 _cte_relacionMaxAnchoAlto = 1.5
 _cte_relacionMinAnchoAlto = 0.5
 _colorVerdeCaja = (0, 255, 0)
@@ -12,11 +16,24 @@ _blanco = 255
 _negro = 0
 _limiteBN_mascara = 100
 _tamMatrizFijo = 25
+_sqr255 = 65025
 
+_limGeneral = 50
+_limStop = 200
+_limInfPro = 100
+_limSupPro = 150
+_limInfPre = 50
+_limSupPre = 70
+_tipoPro = 1
+_tipoPre = 2
+_tipoStop = 3
+_porcentaje = 100
 _ampliacionCaja1 = 10
 _ampliacionCaja2 = 4
+_pix_totales = 625
 
 # Parametros constructor MSER
+
 _delta = 10
 _min_area = 100
 _max_area = 2000
@@ -27,8 +44,8 @@ _area_threshold = 1.01
 _min_margin = 0.003
 _edge_blur_size = 5
 
-_pix_totales = 625
-# Rojos:01520
+# Intervalo de rojos:
+
 _rojo_bajos1 = np.array([0, 50, 50], dtype=np.uint8)
 _rojo_bajos2 = np.array([240, 50, 50], dtype=np.uint8)
 _rojo_altos1 = np.array([12, 255, 255], dtype=np.uint8)
@@ -36,6 +53,8 @@ _rojo_altos2 = np.array([256, 255, 255], dtype=np.uint8)
 
 
 def main():
+    # Captación de argumentos consola
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--train_path", "--train_path", help="Ruta carpeta imagenes de entrenamiento")
     parser.add_argument("--test_path", "--test_path", help="Ruta carpeta imagenes test")
@@ -45,17 +64,18 @@ def main():
 
     entrenamiento = args.train_path
     test = args.test_path
-    # detector = args.detector
+    # detector = args.detector (no tenemos otro detector disponible)
 
-    # test + "/resultado.txt"
     fichero_result = os.path.join(test, "resultado.txt")
 
     # Si existe un fichero anterior, lo elimina:
     if os.path.isfile(fichero_result):
         os.remove(fichero_result)
 
+    # Creacion de las mascaras medias de prohibicion, precaucion y stop
     mascaras_medias = mascara_media(entrenamiento)
 
+    # Cargado de todas las imagenes de la ruta a testear
     lista_dir = os.listdir(test)
     lista_dir.sort()
 
@@ -76,8 +96,10 @@ def main():
         # Detectamos regiones alto contraste
         rects = regiones_detectadas(gray_eq, vis)
 
+        # Creamos las mascaras de cada region detectada y la comparamos con las mascaras medias
         datos = crea_compara_mascaras(img, mascaras_medias, rects)
 
+        # Escritura del fichero por cada señal detectada en la imagen (linea a linea)
         for senyal in datos:
             escribir(fichero_result, titulo, senyal)
 
@@ -92,7 +114,7 @@ def crea_compara_mascaras(img, mascaras_medias, rects):
         if (x > 0) and (y > 0) and (y + h > 0):
             crop_img = img[y:y + h, x:x + w]
 
-            # No sabemos como se hace para ajustar la imagen a 25 pixeles
+            # Redimension de la imagen a 25x25 y conversion a HSV
             img_recortada = cv2.resize(crop_img, (_tamMatrizFijo, _tamMatrizFijo), interpolation=cv2.INTER_NEAREST)
             hsv = cv2.cvtColor(img_recortada, cv2.COLOR_BGR2HSV)
 
@@ -104,26 +126,28 @@ def crea_compara_mascaras(img, mascaras_medias, rects):
             mask = cv2.add(mascara_rojo1, mascara_rojo2)
 
             # Comparacion de mascaras
-            # //255*255 para sacar unos en aux_mask
-            aux_mask_pro = (mask * mascaras_medias[0]) // (255*255)
-            aux_mask_pre = (mask * mascaras_medias[1]) // (255*255)
-            aux_mask_stp = (mask * mascaras_medias[2]) // (255*255)
+            # //255*255 = 65025 para sacar unos en aux_mask (cuantos pixels coinciden)
+            aux_mask_pro = (mask * mascaras_medias[0]) // _sqr255
+            aux_mask_pre = (mask * mascaras_medias[1]) // _sqr255
+            aux_mask_stp = (mask * mascaras_medias[2]) // _sqr255
 
             pix_mask_pro = int(np.sum(aux_mask_pro))
             pix_mask_pre = int(np.sum(aux_mask_pre))
             pix_mask_stp = int(np.sum(aux_mask_stp))
+
+            # Caragado de datos de la senyal detectada (ifs para filtrar y obtener tipo de la senyal detectada)
             if not pertenece(x, y, w, h, detecciones):
-                if (pix_mask_pre > 50) or (pix_mask_pro > 50) or (pix_mask_stp > 50):
-                    if (pix_mask_stp > 200):
-                        print("STOP")
+                if (pix_mask_pre > _limGeneral) or (pix_mask_pro > _limGeneral) or (pix_mask_stp > _limGeneral):
+                    if pix_mask_stp > _limStop:
+                        # print("STOP")
                         score_stp = pix_mask_stp / _pix_totales
 
                         senyal.append(x)
                         senyal.append(y)
                         senyal.append(x + w)
                         senyal.append(y + h)
-                        senyal.append(3)
-                        senyal.append(int(score_stp * 100))
+                        senyal.append(_tipoStop)
+                        senyal.append(int(score_stp * _porcentaje))
 
                         datos.append(senyal)
 
@@ -131,16 +155,17 @@ def crea_compara_mascaras(img, mascaras_medias, rects):
                         detecciones.append(coor)
 
                         senyal = []
-                    elif(pix_mask_pro > 100 and pix_mask_pro < 150):
-                        print("PROHIBICION")
+
+                    elif(pix_mask_pro > _limInfPro) and (pix_mask_pro < _limSupPro):
+                        # print("PROHIBICION")
                         score_pro = pix_mask_pro / _pix_totales
 
                         senyal.append(x)
                         senyal.append(y)
                         senyal.append(x + w)
                         senyal.append(y + h)
-                        senyal.append(1)
-                        senyal.append(int(score_pro * 100))
+                        senyal.append(_tipoPro)
+                        senyal.append(int(score_pro * _porcentaje))
 
                         datos.append(senyal)
 
@@ -148,16 +173,17 @@ def crea_compara_mascaras(img, mascaras_medias, rects):
                         detecciones.append(coor)
 
                         senyal = []
-                    elif(pix_mask_pre > 50 and pix_mask_pre < 70):
-                        print("PRECAUCION")
+
+                    elif (pix_mask_pre > _limInfPre) and (pix_mask_pre < _limSupPre):
+                        # print("PRECAUCION")
                         score_pre = pix_mask_pre / _pix_totales
 
                         senyal.append(x)
                         senyal.append(y)
                         senyal.append(x + w)
                         senyal.append(y + h)
-                        senyal.append(2)
-                        senyal.append(int(score_pre * 100))
+                        senyal.append(_tipoPro)
+                        senyal.append(int(score_pre * _porcentaje))
 
                         datos.append(senyal)
 
@@ -175,7 +201,7 @@ def regiones_detectadas(gray, vis):
                            _area_threshold, _min_margin, _edge_blur_size)
     regions, _ = mser.detectRegions(gray)
 
-    # Pintamos los rectangulos de las regiones detectadas
+    # Pintamos los rectangulos de las regiones detectadas y se almacenan en la lista rects
     for j in range(0, len(regions)):
         x, y, w, h = cv2.boundingRect(regions[j])
         relacion = w / h
@@ -201,7 +227,7 @@ def mascara_media(ruta):
     mascaras = [[], [], []]
     parametros = []
 
-    # with open(ruta + "/gt.txt", "r") as fichero:
+    # Obtencion de datos del fichero gt.txt
     with open(os.path.join(ruta, "gt.txt")) as fichero:
         for linea in fichero:
             parametros.append(linea.split(";"))
@@ -218,9 +244,9 @@ def mascara_media(ruta):
 
             # Prohibicion
             if ((tipo >= 0) and (tipo <= 5)) or ((tipo >= 7) and (tipo <= 10)) or ((tipo == 15) or (tipo == 16)):
-                # imagen = cv2.imread(ruta + "/" + titulo)
+                # Cargamos la imagen obtenida del fichero gt.txt
                 imagen = cv2.imread(os.path.join(ruta, titulo))
-                # Se recorta la senyal y se redimensiona a 25x25
+                # Se recorta la senyal y se redimensiona a 25x25 y conversion a HSV
                 recortada = cv2.resize(imagen[y:y + h, x:x + w], (_tamMatrizFijo, _tamMatrizFijo),
                                        interpolation=cv2.INTER_NEAREST)
                 hsv = cv2.cvtColor(recortada, cv2.COLOR_BGR2HSV)
@@ -232,13 +258,14 @@ def mascara_media(ruta):
                 # Juntar todas las mascaras
                 mascara_final = cv2.add(mascara_bajos, mascara_altos)
 
+                # Se añade al elemento de la lista correspondiente al tipo
                 mascaras[0].append(mascara_final)
 
             # Peligro
             elif (tipo == 11) or ((tipo >= 18) and (tipo <= 31)):
-                # imagen = cv2.imread(ruta + "/" + titulo)
+                # Cargamos la imagen obtenida del fichero gt.txt
                 imagen = cv2.imread(os.path.join(ruta, titulo))
-                # Se recorta la senyal y se redimensiona a 25x25
+                # Se recorta la senyal y se redimensiona a 25x25 y conversion a HSV
                 recortada = cv2.resize(imagen[y:y + h, x:x + w], (_tamMatrizFijo, _tamMatrizFijo),
                                        interpolation=cv2.INTER_NEAREST)
                 hsv = cv2.cvtColor(recortada, cv2.COLOR_BGR2HSV)
@@ -250,13 +277,14 @@ def mascara_media(ruta):
                 # Juntar todas las mascaras
                 mascara_final = cv2.add(mascara_bajos, mascara_altos)
 
+                # Se añade al elemento de la lista correspondiente al tipo
                 mascaras[1].append(mascara_final)
 
             # STOP
             elif tipo == 14:
-                # imagen = cv2.imread(ruta + "/" + titulo)
+                # Cargamos la imagen obtenida del fichero gt.txt
                 imagen = cv2.imread(os.path.join(ruta, titulo))
-                # Se recorta la senyal y se redimensiona a 25x25
+                # Se recorta la senyal y se redimensiona a 25x25 y conversion a HSV
                 recortada = cv2.resize(imagen[y:y + h, x:x + w], (_tamMatrizFijo, _tamMatrizFijo),
                                        interpolation=cv2.INTER_NEAREST)
                 hsv = cv2.cvtColor(recortada, cv2.COLOR_BGR2HSV)
@@ -268,6 +296,7 @@ def mascara_media(ruta):
                 # Juntar todas las mascaras
                 mascara_final = cv2.add(mascara_bajos, mascara_altos)
 
+                # Se añade al elemento de la lista correspondiente al tipo
                 mascaras[2].append(mascara_final)
 
     mascaras_media = [np.zeros((_tamMatrizFijo, _tamMatrizFijo)), np.zeros((_tamMatrizFijo, _tamMatrizFijo)),
@@ -275,26 +304,40 @@ def mascara_media(ruta):
 
     # Calculamos la media para STOP
     for mascara in mascaras[2]:
+        # Sumamos todas las mascaras
         mascaras_media[2] += mascara
+
+    # Dividimos la suma entre el numero de mascaras sumadas
     mascaras_media[2] = mascaras_media[2] // len(mascaras[2])
+
+    # Convertimos los valores menores que 100 a 0 y mayores o iguales que 100 a 255
     condicion1 = mascaras_media[2] < _limiteBN_mascara
     condicion2 = mascaras_media[2] >= _limiteBN_mascara
     mascaras_media[2][condicion1] = _negro
     mascaras_media[2][condicion2] = _blanco
 
-    # Calculamos la media para Peligro (1) y Prohibicion(0)
+    # Calculamos la media para Prohibicion(0) y Peligro (1)
     for mascara in mascaras[0]:
+        # Sumamos todas las mascaras
         mascaras_media[0] += mascara
 
+    # Dividimos la suma entre el numero de mascaras sumadas
     mascaras_media[0] = mascaras_media[0] // len(mascaras[0])
+
+    # Convertimos los valores menores que 100 a 0 y mayores o iguales que 100 a 255
     condicion1 = mascaras_media[0] < _limiteBN_mascara
     condicion2 = mascaras_media[0] >= _limiteBN_mascara
     mascaras_media[0][condicion1] = _negro
     mascaras_media[0][condicion2] = _blanco
 
     for mascara in mascaras[1]:
+        # Sumamos todas las mascaras
         mascaras_media[1] += mascara
+
+    # Dividimos la suma entre el numero de mascaras sumadas
     mascaras_media[1] = mascaras_media[1] // len(mascaras[1])
+
+    # Convertimos los valores menores que 100 a 0 y mayores o iguales que 100 a 255
     condicion1 = mascaras_media[1] < _limiteBN_mascara
     condicion2 = mascaras_media[1] >= _limiteBN_mascara
     mascaras_media[1][condicion1] = _negro
@@ -304,6 +347,7 @@ def mascara_media(ruta):
 
 
 def escribir(ruta, titulo, datos):
+    # Si datos no es vacio, entonces generamos la linea y la escribimos en el fichero
     if datos:
         linea = titulo
         for dato in datos:
@@ -318,6 +362,8 @@ def pertenece(x, y, w, h, senyal):
     esta = False
     x2 = x+w
     y2 = y+h
+    # Comprobamos que las coordenadas (x e y) y/o (x2 e y2) se encuentran en senyal
+    # Esto nos sirve para eliminar algunas detecciones duplicadas
     for i in range(0, len(senyal)):
         x_aux, y_aux, w_aux, h_aux = senyal[i]
         x2_aux = x_aux + w_aux
@@ -330,4 +376,3 @@ def pertenece(x, y, w, h, senyal):
 
 main()
 print("-------- RECONOCIMIENTO FINALIZADO --------")
-
