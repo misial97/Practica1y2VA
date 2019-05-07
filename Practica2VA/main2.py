@@ -63,7 +63,12 @@ def main():
 
             #Insertamos DescripcionHOG en la matriz
             #print(np.transpose(calculoHOG).shape)
-            matrizCarac = np.concatenate((matrizCarac, np.transpose(calculoHOG)))
+
+            # si es la primera fila, sustituye la inicializada a 0
+            if contadorImagenes == 0:
+                matrizCarac[0] = np.transpose(calculoHOG)
+            else:
+                matrizCarac = np.concatenate((matrizCarac, np.transpose(calculoHOG)))
             matrizEtiq[contadorImagenes, 0] = str(carpeta.title())
             contadorImagenes = contadorImagenes + 1
             #print(calculoHOG)
